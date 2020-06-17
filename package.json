@@ -17,6 +17,8 @@
   },
   "scripts": {
     "start": "npx nodemon app.js",
+    "parse": "node ./scripts/parse.js",
+    "importDuo": "node ./scripts/import.js",
     "clearUsers": "node ./scripts/clearUsers.js"
   },
   "devDependencies": {
@@ -26,6 +28,7 @@
     "@types/joi-password-complexity": "^3.1.0",
     "@types/lodash": "^4.14.155",
     "@types/mongoose": "^5.7.24",
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.4",
+    "yargs": "^15.3.1"
   }
 }
