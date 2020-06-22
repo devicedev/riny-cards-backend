@@ -43,7 +43,7 @@ const validateRegisterSchema = Joi.object({
   email: Joi.string().email().min(5).max(255).required(),
   password: passwordComplexity({
     min: 5,
-    max: 26,
+    max: 50,
     lowerCase: 1,
     upperCase: 1,
     numeric: 1,
