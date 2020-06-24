@@ -19,7 +19,8 @@
     "start": "npx nodemon app.js",
     "parse": "node ./scripts/parse.js",
     "importDuo": "node ./scripts/import.js",
-    "clearUsers": "node ./scripts/clearUsers.js"
+    "clearDB": "node ./scripts/clearDB.js",
+    "listDB": "node ./scripts/listDB.js"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
