@@ -1,10 +1,10 @@
 const mongoose = require('mongoose')
 
 module.exports = () => {
-  const {DB_NAME, DB_PASSWORD} = process.env
-  const dbURI = `mongodb+srv://root:${DB_PASSWORD}@riny-cards-oldde.mongodb.net/${DB_NAME}?retryWrites=true&w=majority`
-  const options = {useNewUrlParser: true, useUnifiedTopology: true}
-  mongoose.connect(dbURI, options)
+  const { DB_NAME, DB_URI } = process.env
+  const options = { useNewUrlParser: true, useUnifiedTopology: true }
+  mongoose
+    .connect(DB_URI, options)
     .then(() => console.log(`Connected to ${DB_NAME} database`))
-    .catch(err => console.error(err))
+    .catch((err) => console.error(err))
 }
