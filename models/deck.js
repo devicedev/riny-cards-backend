@@ -1,9 +1,10 @@
 const mongoose = require('mongoose')
 const Joi = require('@hapi/joi')
+const { cardJoiSchema } = require('./card')
 
 const deckSchema = new mongoose.Schema(
   {
-    name: {
+    title: {
       type: String,
       minlength: 1,
       maxlength: 255,
@@ -12,10 +13,10 @@ const deckSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      minlength: 1,
+      minlength: 0,
       maxlength: 500,
       trim: true,
-      required: true,
+      required: false,
     },
     language: {
       type: String,
@@ -28,17 +29,23 @@ const deckSchema = new mongoose.Schema(
     coverImage: String,
     cards: [{ type: mongoose.Schema.ObjectId, ref: 'Card' }],
     author: { type: mongoose.Schema.ObjectId, ref: 'User' },
-    deleted: Boolean,
-    imported: Boolean,
+    deleted: {
+      type: Boolean,
+      default: false,
+    },
+    imported: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } }
 )
 
 const joiSchema = Joi.object({
-  name: Joi.string().min(1).max(255).required(),
-  description: Joi.string().min(1).max(500).required(),
+  title: Joi.string().min(1).max(255).required(),
+  description: Joi.string().max(500).allow('').optional(),
+  cards: Joi.array().items(cardJoiSchema).min(1).required(),
 })
-
 const validate = (deck) => joiSchema.validate(deck)
 
 const Deck = mongoose.model('Deck', deckSchema)
