@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const { User } = require('../models/user')
-const { Deck, validate } = require('../models/deck')
+const { Deck, validateCreate, validateUpdate } = require('../models/deck')
 const { Card } = require('../models/card')
 const auth = require('../middleware/auth')
 const exists = require('../middleware/exists')(Deck)
@@ -18,13 +18,15 @@ router.get('/', [auth], async (req, res) => {
 
 router.get('/:id', [auth, exists], async (req, res) => {
   const { id } = req.params
-  const deck = await Deck.findById(id).populate('cards')
+  const deck = await Deck.findById(id)
+    .populate('author', 'name')
+    .populate('cards', 'front back')
   return res.status(200).send(deck)
 })
 
 router.post('/', [auth], async (req, res) => {
   const body = req.body
-  const { error } = validate(body)
+  const { error } = validateCreate(body)
   if (error) return res.status(400).send(error.details[0].message)
 
   const { title, description, cards } = body
@@ -44,14 +46,30 @@ router.post('/', [auth], async (req, res) => {
   return res.status(200).send(result)
 })
 router.put('/:id', [auth, exists], async (req, res) => {
+  const { _id: authorId } = req.user
   const { id } = req.params
   const body = req.body
-  const { error } = validate(body)
+  const { error } = validateUpdate(body)
   if (error) return res.status(400).send(error.details[0].message)
 
-  const { title, description } = body
-  const deck = await Deck.findByIdAndUpdate(id, { title, body }, { new: true })
-  console.log(deck)
+  const { title, description, cards: bodyCards } = body
+  const deck = await Deck.findByIdAndUpdate(
+    id,
+    { title, description },
+    { new: true }
+  )
+  for (const card of bodyCards) {
+    const { front, back, _id } = card
+    if (_id) {
+      await Card.findByIdAndUpdate(_id, { front, back }, { new: true })
+    } else {
+      const newCard = new Card({ front, back, author: authorId })
+      await newCard.save()
+      deck.cards.push(newCard)
+    }
+  }
+  await deck.save()
+  return res.status(200).send(deck)
 })
 
 router.delete('/:id', [auth, exists], async (req, res) => {

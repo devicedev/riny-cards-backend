@@ -1,20 +1,21 @@
 const mongoose = require('mongoose')
 const Joi = require('@hapi/joi')
+Joi.objectId = require('joi-objectid')(Joi)
 
 const cardSchema = new mongoose.Schema(
   {
     front: {
       type: String,
       required: true,
-      min: 1,
-      max: 255,
+      minlength: 1,
+      maxlength: 250,
       trim: true,
     },
     back: {
       type: String,
       required: true,
-      min: 1,
-      max: 255,
+      minlength: 1,
+      maxlength: 250,
       trim: true,
     },
     decks: [
@@ -26,17 +27,20 @@ const cardSchema = new mongoose.Schema(
   },
   { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } }
 )
-
-const joiSchema = Joi.object({
-  front: Joi.string().min(1).max(255).required(),
-  back: Joi.string().min(1).max(255).required(),
-})
-const validate = (card) => joiSchema.validate(card)
-
 const Card = mongoose.model('Card', cardSchema)
+
+const joiSchemaCreate = Joi.object({
+  front: Joi.string().min(1).max(250).required(),
+  back: Joi.string().min(1).max(250).required(),
+})
+const joiSchemaUpdate = Joi.object({
+  _id: Joi.objectId(),
+  front: Joi.string().min(1).max(250).required(),
+  back: Joi.string().min(1).max(250).required(),
+})
 
 module.exports = {
   Card,
-  validate,
-  cardJoiSchema: joiSchema,
+  cardJoiSchemaCreate: joiSchemaCreate,
+  cardJoiSchemaUpdate: joiSchemaUpdate,
 }
