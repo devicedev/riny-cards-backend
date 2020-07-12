@@ -13,4 +13,5 @@ router.get('/:deckId/:lessonIndex', [auth, exists], async (req, res) => {
   const lesson = deck.cards.slice(lessonIndex * 5, (lessonIndex + 1) * 5)
   return res.status(200).send(lesson)
 })
+
 module.exports = router

@@ -4,8 +4,12 @@ const router = express.Router()
 const { User } = require('../models/user')
 const { Deck, validateCreate, validateUpdate } = require('../models/deck')
 const { Card } = require('../models/card')
+
 const auth = require('../middleware/auth')
 const exists = require('../middleware/exists')(Deck)
+const validate = require('../middleware/validate')
+const deckBelongsToUser = require('../middleware/deckBelongsToUser')
+const cardsBelongToDeck = require('../middleware/cardsBelongToDeck')
 
 router.get('/', [auth], async (req, res) => {
   const { _id } = req.user
@@ -24,12 +28,8 @@ router.get('/:id', [auth, exists], async (req, res) => {
   return res.status(200).send(deck)
 })
 
-router.post('/', [auth], async (req, res) => {
-  const body = req.body
-  const { error } = validateCreate(body)
-  if (error) return res.status(400).send(error.details[0].message)
-
-  const { title, description, cards } = body
+router.post('/', [auth, validate(validateCreate)], async (req, res) => {
+  const { title, description, cards } = req.body
   const { _id } = req.user
   const user = await User.findById(_id)
   const deck = new Deck({ title, description, author: _id })
@@ -45,34 +45,52 @@ router.post('/', [auth], async (req, res) => {
 
   return res.status(200).send(result)
 })
-router.put('/:id', [auth, exists], async (req, res) => {
-  const { _id: authorId } = req.user
-  const { id } = req.params
-  const body = req.body
-  const { error } = validateUpdate(body)
-  if (error) return res.status(400).send(error.details[0].message)
 
-  const { title, description, cards: bodyCards } = body
-  const deck = await Deck.findByIdAndUpdate(
-    id,
-    { title, description },
-    { new: true }
-  )
-  for (const card of bodyCards) {
-    const { front, back, _id } = card
-    if (_id) {
-      await Card.findByIdAndUpdate(_id, { front, back }, { new: true })
-    } else {
+router.put(
+  '/:id',
+  [
+    auth,
+    exists,
+    validate(validateUpdate),
+    deckBelongsToUser,
+    cardsBelongToDeck,
+  ],
+  async (req, res) => {
+    const { _id: authorId } = req.user
+    const { id } = req.params
+
+    const { title, description, cards: bodyCards } = req.body
+    const deck = await Deck.findById(id)
+    deck.title = title
+    deck.description = description
+
+    const deckCards = [...deck.cards]
+    for (const oldCard of deckCards) {
+      const find = bodyCards.find(
+        (bodyCard) => bodyCard._id && bodyCard._id === oldCard.toString()
+      )
+      if (!find) {
+        await Card.findByIdAndRemove(oldCard)
+        deck.cards.pull(oldCard)
+      } else {
+        const { _id, front, back } = find
+        await Card.findByIdAndUpdate(_id, { front, back }, { new: true })
+      }
+    }
+
+    const newCards = bodyCards.filter((bodyCard) => !bodyCard._id)
+    for (const newCardBody of newCards) {
+      const { front, back } = newCardBody
       const newCard = new Card({ front, back, author: authorId })
       await newCard.save()
       deck.cards.push(newCard)
     }
+    await deck.save()
+    return res.status(200).send(deck)
   }
-  await deck.save()
-  return res.status(200).send(deck)
-})
+)
 
-router.delete('/:id', [auth, exists], async (req, res) => {
+router.delete('/:id', [auth, exists, deckBelongsToUser], async (req, res) => {
   const { id } = req.params
   const deck = await Deck.findById(id).populate('cards')
   for (const card of deck.cards) {

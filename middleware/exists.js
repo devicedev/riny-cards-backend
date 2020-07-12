@@ -1,4 +1,4 @@
-const exists = (Model, idName = 'id') => async (req, res, next) => {
+module.exports = (Model, idName = 'id') => async (req, res, next) => {
   try {
     const id = req.params[idName]
     await Model.findById(id)
@@ -9,4 +9,3 @@ const exists = (Model, idName = 'id') => async (req, res, next) => {
   }
   next()
 }
-module.exports = exists
