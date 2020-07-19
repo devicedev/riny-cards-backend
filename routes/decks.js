@@ -65,9 +65,10 @@ router.put(
     deck.description = description
 
     const deckCards = [...deck.cards]
+    const oldCards = bodyCards.filter((bodyCard) => bodyCard._id)
     for (const oldCard of deckCards) {
-      const find = bodyCards.find(
-        (bodyCard) => bodyCard._id && bodyCard._id === oldCard.toString()
+      const find = oldCards.find(
+        (bodyCard) => bodyCard._id === oldCard.toString()
       )
       if (!find) {
         await Card.findByIdAndRemove(oldCard)
