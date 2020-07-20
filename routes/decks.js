@@ -13,16 +13,16 @@ const cardsBelongToDeck = require('../middleware/cardsBelongToDeck')
 
 router.get('/', [auth], async (req, res) => {
   const { _id } = req.user
-  const decks = await Deck.find({
-    author: { _id },
-    deleted: false,
-  }).sort('-createdAt')
+  const decks = await Deck.find({ author: { _id }, deleted: false })
+    .select('title description cards')
+    .sort('-createdAt')
   return res.status(200).send(decks)
 })
 
 router.get('/:id', [auth, exists], async (req, res) => {
   const { id } = req.params
   const deck = await Deck.findById(id)
+    .select('title description createdAt updatedAt')
     .populate('author', 'name')
     .populate('cards', 'front back')
   return res.status(200).send(deck)

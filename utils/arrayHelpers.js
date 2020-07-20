@@ -1,4 +1,4 @@
-const arrayHelpers = (array) => {
+const shuffle = (array) => {
   let currentIndex = array.length
 
   while (currentIndex !== 0) {
@@ -11,6 +11,7 @@ const arrayHelpers = (array) => {
   }
   return array
 }
+
 const spaceArray = (array, space = 2, key = '_id') => {
   for (let i = 0; i + 1 < array.length; i++) {
     if (array[i][key] === array[i + 1][key]) {
@@ -27,7 +28,8 @@ const spaceArray = (array, space = 2, key = '_id') => {
   }
   return array
 }
+
 module.exports = {
-  shuffle: arrayHelpers,
+  shuffle,
   spaceArray,
 }

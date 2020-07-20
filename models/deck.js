@@ -1,6 +1,9 @@
 const mongoose = require('mongoose')
 const Joi = require('@hapi/joi')
-const { cardJoiSchemaCreate, cardJoiSchemaUpdate } = require('./card')
+const {
+  joiSchemaCreate: cardJoiSchemaCreate,
+  joiSchemaUpdate: cardJoiSchemaUpdate,
+} = require('./card')
 
 const deckSchema = new mongoose.Schema(
   {

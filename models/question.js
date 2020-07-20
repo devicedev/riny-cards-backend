@@ -24,15 +24,22 @@ const schema = new mongoose.Schema(
 )
 const Question = mongoose.model('Question', schema)
 
-const validate = (question) => joiSchema.validate(question)
 const joiSchema = Joi.object({
-  type: Joi.string()
-    .valid(...Object.values(types))
+  questions: Joi.array()
+    .items({
+      card: Joi.objectId().required(),
+      type: Joi.string()
+        .valid(...Object.values(types))
+        .required(),
+      correct: Joi.boolean().required(),
+    })
+    .min(1)
     .required(),
 })
+const validateQuestions = (questions) => joiSchema.validate(questions)
 
 module.exports = {
   Question,
-  validate,
   types,
+  validateQuestions,
 }

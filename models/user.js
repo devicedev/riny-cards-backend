@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     decks: [{ type: mongoose.Schema.ObjectId, ref: 'Deck' }],
+    lessons: [{ type: mongoose.Schema.ObjectId, ref: 'Lesson' }],
   },
   { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } }
 )

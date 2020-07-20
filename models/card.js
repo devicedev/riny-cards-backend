@@ -41,6 +41,6 @@ const joiSchemaUpdate = Joi.object({
 
 module.exports = {
   Card,
-  cardJoiSchemaCreate: joiSchemaCreate,
-  cardJoiSchemaUpdate: joiSchemaUpdate,
+  joiSchemaCreate,
+  joiSchemaUpdate,
 }
