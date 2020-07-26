@@ -4,6 +4,7 @@ const router = express.Router()
 const { User } = require('../models/user')
 const { Deck, validateCreate, validateUpdate } = require('../models/deck')
 const { Card } = require('../models/card')
+const { Lesson } = require('../models/lesson')
 
 const auth = require('../middleware/auth')
 const exists = require('../middleware/exists')(Deck)
@@ -11,20 +12,60 @@ const validate = require('../middleware/validate')
 const deckBelongsToUser = require('../middleware/deckBelongsToUser')
 const cardsBelongToDeck = require('../middleware/cardsBelongToDeck')
 
+const {
+  getLessonProgress,
+  getLessonPartsProgress,
+} = require('../utils/progress')
+
 router.get('/', [auth], async (req, res) => {
-  const { _id } = req.user
-  const decks = await Deck.find({ author: { _id }, deleted: false })
+  const { _id: userId } = req.user
+  const decks = await Deck.find({ author: userId, deleted: false })
     .select('title description cards')
     .sort('-createdAt')
+  const { lessons } = await User.findById(userId)
+    .select('lessons')
+    .populate({
+      path: 'lessons',
+      select: 'questions deck',
+      populate: {
+        path: 'questions',
+        select: 'card correct',
+      },
+    })
+  for (const deck of decks) {
+    const { _id: deckId } = deck
+
+    const lesson = lessons.find(
+      (lesson) => lesson.deck.toString() === deckId.toString()
+    )
+    if (lesson) {
+      const { questions } = lesson
+      const { cards } = deck
+      deck._doc.progress = getLessonProgress(questions, cards)
+    }
+  }
   return res.status(200).send(decks)
 })
 
 router.get('/:id', [auth, exists], async (req, res) => {
   const { id } = req.params
+  const { _id: userId } = req.user
   const deck = await Deck.findById(id)
     .select('title description createdAt updatedAt')
     .populate('author', 'name')
     .populate('cards', 'front back')
+
+  const lesson = await Lesson.findOne({ deck: id, user: userId }).populate(
+    'questions',
+    'card type correct createdAt updatedAt'
+  )
+  let questions = []
+  const { cards } = deck
+  if (lesson) {
+    questions = lesson.questions
+  }
+  deck._doc.parts = getLessonPartsProgress(questions, cards)
+
   return res.status(200).send(deck)
 })
 

@@ -30,7 +30,7 @@ router.get('/:deckId/:index', [auth, exists], async (req, res) => {
   if (
     index !== 'training' &&
     (!Number.isInteger(parsedIndex) ||
-      cardsCount < (parsedIndex + 1) * 5 ||
+      cardsCount < parsedIndex * 5 ||
       parsedIndex < 0)
   ) {
     return res.status(400).send('Invalid lesson index')
@@ -79,7 +79,11 @@ router.get('/:deckId/:index', [auth, exists], async (req, res) => {
       cards = randomCards.slice(0, 5)
     }
   } else {
-    cards = deck.cards.slice(index * 5, (index + 1) * 5)
+    const numberOfCards = (parsedIndex + 1) * 5
+    cards = deck.cards.slice(
+      parsedIndex * 5,
+      numberOfCards > cardsCount ? cardsCount : numberOfCards
+    )
   }
   for (const card of cards) {
     const { _id, front, back } = card

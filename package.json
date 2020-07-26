@@ -20,7 +20,8 @@
     "parse": "node ./scripts/parse.js",
     "importDuo": "node ./scripts/import.js",
     "clearDB": "node ./scripts/clearDB.js",
-    "listDB": "node ./scripts/listDB.js"
+    "listDB": "node ./scripts/listDB.js",
+    "importAnki": "node ./scripts/importAnki.js"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
