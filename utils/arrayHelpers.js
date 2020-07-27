@@ -21,7 +21,7 @@ const spaceArray = (array, space = 2, key = '_id') => {
         const temporaryElement = copy[i + 1 + space]
         copy[i + 1 + space] = copy[i + 1]
         copy[i + 1] = temporaryElement
-      } else {
+      } else if (i - 1 - space >= 0) {
         const temporaryElement = copy[i - 1 - space]
         copy[i - 1 - space] = copy[i + 1]
         copy[i + 1] = temporaryElement

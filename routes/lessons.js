@@ -92,6 +92,7 @@ router.get('/:deckId/:index', [auth, exists], async (req, res) => {
       { _id, back: front, front: back, type: types.BACK_FRONT_TYPE }
     )
   }
+
   questions = shuffle(questions)
   questions = spaceArray(questions)
 
