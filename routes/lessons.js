@@ -23,7 +23,6 @@ router.get('/:deckId/:index', [auth, exists], async (req, res) => {
   )
   const cardsCount = deck.cards.length
 
-  let questions = []
   let cards = []
   const deckCards = deck.cards
   const parsedIndex = parseInt(index)
@@ -80,21 +79,116 @@ router.get('/:deckId/:index', [auth, exists], async (req, res) => {
     }
   } else {
     const numberOfCards = (parsedIndex + 1) * 5
-    cards = deck.cards.slice(
+    cards = deckCards.slice(
       parsedIndex * 5,
       numberOfCards > cardsCount ? cardsCount : numberOfCards
     )
+    if (lesson) {
+      cards.forEach((card) => {
+        card._doc.new = !lesson.questions.some(
+          (question) => question.card.toString() === card._id.toString()
+        )
+      })
+    } else {
+      cards.forEach((card) => {
+        card._doc.new = true
+      })
+      console.log(JSON.stringify(cards, null, 2))
+    }
   }
+  const newCards = []
+  let questions = []
+  let writeQuestions = []
+  const frontBackQuestions = []
+  const backFrontQuestions = []
   for (const card of cards) {
     const { _id, front, back } = card
-    questions.push(
-      { _id, front, back, type: types.FRONT_BACK_TYPE },
-      { _id, back: front, front: back, type: types.BACK_FRONT_TYPE }
-    )
+    const { new: newProp } = card._doc
+    if (newProp) {
+      newCards.push(card)
+    }
+    frontBackQuestions.push({
+      _id,
+      front,
+      back,
+      type: types.FRONT_BACK_TYPE,
+      new: newProp,
+    })
+    backFrontQuestions.push({
+      _id,
+      back: front,
+      front: back,
+      type: types.BACK_FRONT_TYPE,
+      new: newProp,
+    })
   }
+  writeQuestions.push(...frontBackQuestions, ...backFrontQuestions)
+  writeQuestions = shuffle(writeQuestions)
+  writeQuestions = spaceArray(writeQuestions)
 
-  questions = shuffle(questions)
-  questions = spaceArray(questions)
+  let standardQuestions = []
+  let choiceQuestions = []
+  const falseChoiceFrontBackQuestions = [...frontBackQuestions]
+  const falseChoiceBackFrontQuestions = [...backFrontQuestions]
+
+  newCards.forEach((newCard) => {
+    const { _id, front, back } = newCard
+    standardQuestions.push({
+      _id,
+      front,
+      back,
+      type: types.STANDARD_TYPE,
+      new: true,
+    })
+
+    function falseChoiceGenerator(falseChoiceQuestions) {
+      return falseChoiceQuestions
+        .filter(
+          (falseChoiceQuestion) =>
+            falseChoiceQuestion._id.toString() !== newCard._id.toString()
+        )
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 2)
+        .map((falseChoiceQuestion) => falseChoiceQuestion.back)
+    }
+
+    const randomFrontBackChoices = falseChoiceGenerator(
+      falseChoiceFrontBackQuestions
+    )
+    const randomFrontBackIndex = Math.floor(Math.random() * 3)
+    randomFrontBackChoices.splice(randomFrontBackIndex, 0, back)
+    choiceQuestions.push({
+      _id,
+      front,
+      back,
+      choices: randomFrontBackChoices,
+      type: types.CHOICE_TYPE,
+      new: true,
+    })
+
+    const randomBackFrontChoices = falseChoiceGenerator(
+      falseChoiceBackFrontQuestions
+    )
+    const randomBackFrontIndex = Math.floor(Math.random() * 3)
+    randomBackFrontChoices.splice(randomBackFrontIndex, 0, front)
+    choiceQuestions.push({
+      _id,
+      front: back,
+      back: front,
+      choices: randomBackFrontChoices,
+      type: types.CHOICE_TYPE,
+      new: true,
+    })
+  })
+
+  standardQuestions = shuffle(standardQuestions)
+
+  choiceQuestions = shuffle(choiceQuestions)
+  choiceQuestions = spaceArray(choiceQuestions)
+
+  questions.unshift(...standardQuestions, ...choiceQuestions, ...writeQuestions)
+
+  console.table(questions)
 
   return res.status(200).send(questions)
 })
@@ -126,7 +220,7 @@ router.post(
     }
     await lesson.save()
 
-    return res.status(200)
+    return res.status(200).send(null)
   }
 )
 

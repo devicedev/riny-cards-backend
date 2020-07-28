@@ -1,11 +1,18 @@
 const mongoose = require('mongoose')
 const Joi = require('@hapi/joi')
 
+const STANDARD_TYPE = 'STANDARD'
 const CHOICE_TYPE = 'CHOICE'
 const FRONT_BACK_TYPE = 'FRONT_BACK'
 const BACK_FRONT_TYPE = 'BACK_FRONT'
 
-const types = Object.freeze({ CHOICE_TYPE, FRONT_BACK_TYPE, BACK_FRONT_TYPE })
+const types = Object.freeze({
+  STANDARD_TYPE,
+  CHOICE_TYPE,
+  FRONT_BACK_TYPE,
+  BACK_FRONT_TYPE,
+})
+const validTypes = Object.freeze({ FRONT_BACK_TYPE, BACK_FRONT_TYPE })
 
 const schema = new mongoose.Schema(
   {
@@ -29,7 +36,7 @@ const joiSchema = Joi.object({
     .items({
       card: Joi.objectId().required(),
       type: Joi.string()
-        .valid(...Object.values(types))
+        .valid(...Object.values(validTypes))
         .required(),
       correct: Joi.boolean().required(),
     })
