@@ -103,7 +103,7 @@ router.get('/:deckId/:index', [auth, exists], async (req, res) => {
   const backFrontQuestions = []
   for (const card of cards) {
     const { _id, front, back } = card
-    const { new: newProp } = card._doc
+    const newProp = card._doc && card._doc.new
     if (newProp) {
       newCards.push(card)
     }
@@ -125,7 +125,6 @@ router.get('/:deckId/:index', [auth, exists], async (req, res) => {
   writeQuestions.push(...frontBackQuestions, ...backFrontQuestions)
   writeQuestions = shuffle(writeQuestions)
   writeQuestions = spaceArray(writeQuestions)
-
   let standardQuestions = []
   let choiceQuestions = []
   const falseChoiceFrontBackQuestions = [...frontBackQuestions]
@@ -186,9 +185,11 @@ router.get('/:deckId/:index', [auth, exists], async (req, res) => {
   choiceQuestions = shuffle(choiceQuestions)
   choiceQuestions = spaceArray(choiceQuestions)
 
-  questions.unshift(...standardQuestions, ...choiceQuestions, ...writeQuestions)
+  // questions.unshift(...standardQuestions, ...choiceQuestions, ...writeQuestions)
 
   console.table(questions)
+
+  questions.unshift(...writeQuestions)
 
   return res.status(200).send(questions)
 })
