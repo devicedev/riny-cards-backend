@@ -62,14 +62,14 @@ router.get('/:deckId/:index', [auth, exists], async (req, res) => {
           return 0
         }
       })
-      console.table(priority)
+      // console.table(priority)
       const highPriority = priority.slice(0, 3)
-      console.table(highPriority)
+      // console.table(highPriority)
 
       let randomCards = [...priority.slice(3, priority.length)]
       randomCards.sort(() => 0.5 - Math.random())
       randomCards = randomCards.slice(0, 2)
-      console.table(randomCards)
+      // console.table(randomCards)
 
       cards = [...highPriority, ...randomCards]
     } else {
@@ -93,7 +93,7 @@ router.get('/:deckId/:index', [auth, exists], async (req, res) => {
       cards.forEach((card) => {
         card._doc.new = true
       })
-      console.log(JSON.stringify(cards, null, 2))
+      // console.log(JSON.stringify(cards, null, 2))
     }
   }
   const newCards = []
@@ -112,14 +112,12 @@ router.get('/:deckId/:index', [auth, exists], async (req, res) => {
       front,
       back,
       type: types.FRONT_BACK_TYPE,
-      new: newProp,
     })
     backFrontQuestions.push({
       _id,
       back: front,
       front: back,
       type: types.BACK_FRONT_TYPE,
-      new: newProp,
     })
   }
   writeQuestions.push(...frontBackQuestions, ...backFrontQuestions)
@@ -137,7 +135,6 @@ router.get('/:deckId/:index', [auth, exists], async (req, res) => {
       front,
       back,
       type: types.STANDARD_TYPE,
-      new: true,
     })
 
     function falseChoiceGenerator(falseChoiceQuestions) {
@@ -162,7 +159,6 @@ router.get('/:deckId/:index', [auth, exists], async (req, res) => {
       back,
       choices: randomFrontBackChoices,
       type: types.CHOICE_TYPE,
-      new: true,
     })
 
     const randomBackFrontChoices = falseChoiceGenerator(
@@ -176,7 +172,6 @@ router.get('/:deckId/:index', [auth, exists], async (req, res) => {
       back: front,
       choices: randomBackFrontChoices,
       type: types.CHOICE_TYPE,
-      new: true,
     })
   })
 
@@ -185,11 +180,7 @@ router.get('/:deckId/:index', [auth, exists], async (req, res) => {
   choiceQuestions = shuffle(choiceQuestions)
   choiceQuestions = spaceArray(choiceQuestions)
 
-  // questions.unshift(...standardQuestions, ...choiceQuestions, ...writeQuestions)
-
-  console.table(questions)
-
-  questions.unshift(...writeQuestions)
+  questions.unshift(...standardQuestions, ...choiceQuestions, ...writeQuestions)
 
   return res.status(200).send(questions)
 })

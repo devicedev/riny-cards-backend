@@ -28,13 +28,13 @@ const getLessonPartsProgress = (questions, cards) => {
         correctQuestions > incorrectQuestions * 2
           ? 100
           : (module / correctQuestions) * 100
-      if (cardProgress !== 100) {
-        console.log('correct', correctQuestions)
-        console.log('incorrect', incorrectQuestions)
-        console.log(correctQuestions > incorrectQuestions * 2)
-        console.log(cardProgress)
-        console.log(partCard.front)
-      }
+      // if (cardProgress !== 100) {
+      //   console.log('correct', correctQuestions)
+      //   console.log('incorrect', incorrectQuestions)
+      //   console.log(correctQuestions > incorrectQuestions * 2)
+      //   console.log(cardProgress)
+      //   console.log(partCard.front)
+      // }
 
       partProgress.value += cardProgress
     })
