@@ -139,24 +139,17 @@ router.put(
 
 router.delete('/:id', [auth, exists, deckBelongsToUser], async (req, res) => {
   const { id } = req.params
-  const deck = await Deck.findById(id).populate('cards').populate('lesson')
+  const deck = await Deck.findById(id).populate('cards')
   for (const card of deck.cards) {
     await card.remove()
   }
-  const users = await User.find({}).populate({
-    path: 'lessons',
-    populate: 'questions',
-  })
 
-  for (const user of users) {
-    for (const lesson of user.lessons) {
-      if (lesson.deck.toString() === id.toString()) {
-        for (const question of lesson.questions) {
-          await question.remove()
-        }
-        await lesson.remove()
-      }
+  const lessons = await Lesson.find({ deck: id }).populate('questions')
+  for (const lesson of lessons) {
+    for (const question of lesson.questions) {
+      await question.remove()
     }
+    await lesson.remove()
   }
 
   await deck.remove()
