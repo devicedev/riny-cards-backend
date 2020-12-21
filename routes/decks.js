@@ -22,6 +22,7 @@ router.get('/', [auth], async (req, res) => {
   const decks = await Deck.find({ author: userId, deleted: false })
     .select('title description cards')
     .sort('-createdAt')
+    .limit(50)
   const { lessons } = await User.findById(userId)
     .select('lessons')
     .populate({

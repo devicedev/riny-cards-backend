@@ -21,15 +21,18 @@
     "importDuo": "node ./scripts/import.js",
     "clearDB": "node ./scripts/clearDB.js",
     "listDB": "node ./scripts/listDB.js",
-    "importAnki": "node ./scripts/importAnki.js"
+    "importAnki": "node ./scripts/importAnki.js",
+    "seedPlay": "node ./scripts/seedPlayground.js"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
     "@types/express": "^4.17.6",
+    "@types/faker": "^4.1.12",
     "@types/hapi__joi": "^17.1.2",
     "@types/joi-password-complexity": "^3.1.0",
     "@types/lodash": "^4.14.155",
     "@types/mongoose": "^5.7.24",
+    "faker": "^4.1.0",
     "nodemon": "^2.0.4",
     "request": "^2.88.2",
     "yargs": "^15.3.1"
