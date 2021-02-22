@@ -22,17 +22,14 @@ router.get('/', [auth], async (req, res) => {
   const decks = await Deck.find({ author: userId, deleted: false })
     .select('title description cards')
     .sort('-createdAt')
-    .limit(50)
-  const { lessons } = await User.findById(userId)
-    .select('lessons')
-    .populate({
-      path: 'lessons',
-      select: 'questions deck',
-      populate: {
-        path: 'questions',
-        select: 'card correct',
-      },
-    })
+  const { lessons } = await User.findById(userId).select('lessons').populate({
+    path: 'lessons',
+    select: 'deck',
+    //   populate: {
+    //     path: 'questions',
+    //     select: 'card correct',
+    //   },
+  })
   for (const deck of decks) {
     const { _id: deckId } = deck
 
