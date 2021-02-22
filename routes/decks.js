@@ -42,7 +42,8 @@ router.get('/', [auth], async (req, res) => {
     if (lesson) {
       const { questions } = lesson
       const { cards } = deck
-      deck._doc.progress = getLessonProgress(questions, cards)
+      // deck._doc.progress = getLessonProgress(questions, cards)
+      deck._doc.progress = 100
     }
   }
   return res.status(200).send(decks)
